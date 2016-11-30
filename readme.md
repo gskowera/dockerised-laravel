@@ -1,27 +1,33 @@
-# Laravel PHP Framework
+# The Docker setup for Laravel using NGINX, PHP7-FPM and MySQL
 
-[![Build Status](https://travis-ci.org/laravel/framework.svg)](https://travis-ci.org/laravel/framework)
-[![Total Downloads](https://poser.pugx.org/laravel/framework/d/total.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Stable Version](https://poser.pugx.org/laravel/framework/v/stable.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Unstable Version](https://poser.pugx.org/laravel/framework/v/unstable.svg)](https://packagist.org/packages/laravel/framework)
-[![License](https://poser.pugx.org/laravel/framework/license.svg)](https://packagist.org/packages/laravel/framework)
+## Requires
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as authentication, routing, sessions, queueing, and caching.
+- Docker Engine (https://docs.docker.com/engine/installation/)
+- Docker Compose (https://docs.docker.com/compose/install/)
+- NGINX container (`docker pull NGINX`)
+- PHP container (`docker pull php`)
+- MySQL container (`docker pull mysql`)
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications. A superb inversion of control container, expressive migration system, and tightly integrated unit testing support give you the tools you need to build any application with which you are tasked.
+## Instructions
 
-## Official Documentation
+1. Checkout the repository
+2. Run `docker-compose up`
+3. Navigate to [http://localhost/](http://localhost/)
 
-Documentation for the framework can be found on the [Laravel website](http://laravel.com/docs).
+## Setup
 
-## Contributing
+Here's an overview of the setup, this repository contains the default Laravel 5.3 install other than the files listed below.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](http://laravel.com/docs/contributions).
+`/deploy` This is to keep all of the deployment configuration files together and organised.
 
-## Security Vulnerabilities
+`docker-compose.yml`
+This file lets us tell Docker how to build the environment. `docker-compose up` is called, it will read this file and build the necessary containers as well as configure things like networking and volumes.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
+`deploy/app.docker`
+This is the Dockerfile for our app container. It just extends the PHP base image provided by Docker and installs some extra extensions that Laravel needs (mcrypt and mysql).
 
-## License
+`deploy/web.docker`
+This is the Dockerfile for our web container. It extends the [NGINX base image](https://hub.docker.com/_/nhinx/) provided by Docker, and just adds an NGINX config file so our web service knows how to handle requests.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).
+`deploy/vhost.conf`
+This is the NGINX config file thats added to our web container. It's a pretty standard host configuration that proxy's PHP requests to our app container. You'll notice that it communicates with the app container via address `app:9000`. The `app` name is what we named our service and linked to in `docker-compose.yml`, so Docker will know we mean that container and route the request appropriately.
