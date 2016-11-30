@@ -12,7 +12,8 @@
 
 1. Checkout the repository
 2. Run `docker-compose up`
-3. Navigate to [http://localhost/](http://localhost/)
+3. Go to your Laravel root folder and give write permission to `bootstrap/cache` and `storage` directories (`sudo chmod -R 777 bootstrap/cache storage`)
+4. Navigate to [http://localhost/](http://localhost/)
 
 ## Setup
 
