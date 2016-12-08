@@ -1,12 +1,13 @@
-# The Docker setup for Laravel using NGINX, PHP7-FPM and MySQL
+# The Docker setup for Laravel using NGINX, PHP7-FPM, MySQL and phpMyAdmin
 
 ## Requires
 
 - Docker Engine (https://docs.docker.com/engine/installation/)
 - Docker Compose (https://docs.docker.com/compose/install/)
-- NGINX container (`docker pull NGINX`)
+- NGINX container (`docker pull nginx`)
 - PHP container (`docker pull php`)
 - MySQL container (`docker pull mysql`)
+- phpMyAdmin container (`docker pull phpmyadmin/phpmyadmin`)
 
 ## Instructions
 
@@ -14,6 +15,7 @@
 2. Run `docker-compose up`
 3. Go to your Laravel root folder and give write permission to `bootstrap/cache` and `storage` directories (`sudo chmod -R 777 bootstrap/cache storage`)
 4. Navigate to [http://localhost/](http://localhost/)
+5. phpMyAdmin is accessible at [http://localhost:8080](http://localhost:8080)
 
 ## Setup
 
