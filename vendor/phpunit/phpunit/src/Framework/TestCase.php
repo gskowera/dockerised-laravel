@@ -515,7 +515,7 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
      * @return bool
      *
      * @since Method available since Release 3.6.5
-     * @deprecated
+     * @deprecated Use hasExpectationOnOutput() instead
      */
     public function hasPerformedExpectationsOnOutput()
     {
@@ -550,7 +550,7 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
      * @throws PHPUnit_Framework_Exception
      *
      * @since      Method available since Release 3.2.0
-     * @deprecated Method deprecated since Release 5.2.0
+     * @deprecated Method deprecated since Release 5.2.0; use expectException() instead
      */
     public function setExpectedException($exception, $message = '', $code = null)
     {
@@ -574,7 +574,7 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
      *
      * @since Method available since Release 4.3.0
      *
-     * @deprecated Method deprecated since Release 5.6.0
+     * @deprecated Method deprecated since Release 5.6.0; use expectExceptionMessageRegExp() instead
      */
     public function setExpectedExceptionRegExp($exception, $messageRegExp = '', $code = null)
     {
@@ -751,6 +751,14 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
     public function getStatus()
     {
         return $this->status;
+    }
+
+    /**
+     * @since Method available since Release 5.7.6
+     */
+    public function markAsRisky()
+    {
+        $this->status = PHPUnit_Runner_BaseTestRunner::STATUS_RISKY;
     }
 
     /**
@@ -1119,7 +1127,8 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
 
                 $reflector = new ReflectionClass($this->expectedException);
 
-                if ($this->expectedException == 'PHPUnit_Framework_Exception' ||
+                if ($this->expectedException === 'PHPUnit_Framework_Exception' ||
+                    $this->expectedException === '\PHPUnit_Framework_Exception' ||
                     $reflector->isSubclassOf('PHPUnit_Framework_Exception')) {
                     $checkException = true;
                 }
@@ -1618,7 +1627,7 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
      * @throws PHPUnit_Framework_Exception
      *
      * @since Method available since Release 3.0.0
-     * @deprecated Method deprecated since Release 5.4.0
+     * @deprecated Method deprecated since Release 5.4.0; use createMock() or getMockBuilder() instead
      */
     protected function getMock($originalClassName, $methods = [], array $arguments = [], $mockClassName = '', $callOriginalConstructor = true, $callOriginalClone = true, $callAutoload = true, $cloneArguments = false, $callOriginalMethods = false, $proxyTarget = null)
     {
@@ -1652,7 +1661,7 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
      * @throws PHPUnit_Framework_Exception
      *
      * @since Method available since Release 5.0.0
-     * @deprecated Method deprecated since Release 5.4.0
+     * @deprecated Method deprecated since Release 5.4.0; use createMock() instead
      */
     protected function getMockWithoutInvokingTheOriginalConstructor($originalClassName)
     {
@@ -2142,7 +2151,6 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
         return $buffer;
     }
 
-
     /**
      * Gets the data set of a TestCase.
      *
@@ -2477,7 +2485,7 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
         return new Snapshot(
             $blacklist,
             $backupGlobals,
-            $this->backupStaticAttributes,
+            (bool) $this->backupStaticAttributes,
             false,
             false,
             false,
@@ -2607,7 +2615,11 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
         } else {
             foreach ($testArguments as $testArgument) {
                 if ($testArgument instanceof PHPUnit_Framework_MockObject_MockObject) {
-                    $this->registerMockObject(clone $testArgument);
+                    if ($this->isCloneable($testArgument)) {
+                        $testArgument = clone $testArgument;
+                    }
+
+                    $this->registerMockObject($testArgument);
                 } elseif (is_array($testArgument)) {
                     $this->registerMockObjectsFromTestArguments($testArgument);
                 }
@@ -2625,5 +2637,26 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
         if (isset($annotations['method']['doesNotPerformAssertions'])) {
             $this->doesNotPerformAssertions = true;
         }
+    }
+
+    /**
+     * @param PHPUnit_Framework_MockObject_MockObject $testArgument
+     *
+     * @return bool
+     */
+    private function isCloneable(PHPUnit_Framework_MockObject_MockObject $testArgument)
+    {
+        $reflector = new ReflectionObject($testArgument);
+
+        if (!$reflector->isCloneable()) {
+            return false;
+        }
+
+        if ($reflector->hasMethod('__clone') &&
+            $reflector->getMethod('__clone')->isPublic()) {
+            return true;
+        }
+
+        return false;
     }
 }
