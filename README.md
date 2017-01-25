@@ -1,4 +1,4 @@
-# The Docker setup for Laravel using NGINX, PHP7-FPM, MySQL and phpMyAdmin
+# Docker setup for Laravel 5.4 using NGINX, PHP7-FPM, MySQL and phpMyAdmin
 
 ## Requires
 
